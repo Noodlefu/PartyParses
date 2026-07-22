@@ -1,0 +1,52 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Download Dalamud
+        run: |
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile dalamud-latest.zip
+          Expand-Archive -Force dalamud-latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
+
+      - name: Determine version from tag
+        id: version
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build
+        run: dotnet build PartyParses/PartyParses.csproj --configuration Release -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Locate packaged plugin zip
+        id: package
+        run: |
+          $zip = Get-ChildItem -Path . -Recurse -Filter latest.zip | Select-Object -First 1
+          if (-not $zip) { throw "Packaged plugin zip not found under bin/" }
+          echo "path=$($zip.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ steps.package.outputs.path }}
+          generate_release_notes: true

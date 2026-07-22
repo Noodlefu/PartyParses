@@ -1,0 +1,10 @@
+{
+  "Author": "Noodlefu",
+  "Name": "Party Parses",
+  "Punchline": "Shows your party/raid/alliance's best FFLogs parse for the duty you're currently in.",
+  "Description": "Looks up your current party, alliance, or raid group and shows each member's best FFLogs parse for the dungeon/trial/raid you're currently inside. Requires a free FFLogs API v2 client (client ID + secret) configured in the settings window.",
+  "RepoUrl": "https://github.com/Noodlefu/PartyParses",
+  "IconUrl": "https://raw.githubusercontent.com/Noodlefu/PartyParses/main/PartyParses/images/icon.png",
+  "ApplicableVersion": "any",
+  "Tags": ["fflogs", "parses", "party", "raid"]
+}
